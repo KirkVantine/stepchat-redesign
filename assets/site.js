@@ -122,7 +122,7 @@
   var MARK = '<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="currentColor">' +
     '<circle cx="20" cy="5" r="4"/><circle cx="30.6" cy="9.4" r="4"/><circle cx="35" cy="20" r="4"/>' +
     '<circle cx="30.6" cy="30.6" r="4"/><circle cx="20" cy="35" r="4"/><circle cx="9.4" cy="30.6" r="4"/>' +
-    '<circle cx="5" cy="20" r="4"/></g><circle cx="9.4" cy="9.4" r="4" fill="#f4b740"/></svg>';
+    '<circle cx="5" cy="20" r="4"/></g><circle cx="9.4" cy="9.4" r="4" fill="#f2b632"/></svg>';
 
   function renderChrome() {
     var page = document.body.getAttribute("data-page");
