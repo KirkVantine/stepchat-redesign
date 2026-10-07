@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Confirm your meeting attendance | Step Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="certificate">
+  <div id="preview-note"></div>
+  <header id="site-header"></header>
+
+  <main id="main">
+    <div class="wrap page-head no-print">
+      <h1>Confirm your online meeting attendance</h1>
+      <p>Fill in the form after you attend a meeting. Your confirmation appears beside it, ready to save as a PDF or print.</p>
+      <p class="notice" style="max-width:62ch">Please check with your probation officer or caseworker to make sure that online meetings can be used to meet your court-ordered requirements.</p>
+    </div>
+
+    <div class="wrap two-col" style="padding-bottom:84px">
+      <form class="panel no-print" id="cert-form" novalidate>
+        <div id="cert-msg" role="alert"></div>
+        <div class="field" id="pick-field" hidden>
+          <label for="c-pick">Choose from meetings you've attended</label>
+          <select id="c-pick"><option value="">Enter the details myself</option></select>
+        </div>
+        <div class="field">
+          <label for="c-name">Name to show on the confirmation</label>
+          <input id="c-name" type="text" autocomplete="name" aria-describedby="c-name-hint" required>
+          <span class="hint" id="c-name-hint">Use the name your court or caseworker has on file.</span>
+        </div>
+        <div class="field">
+          <label for="c-user">Step Chat username</label>
+          <input id="c-user" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="c-date">Date of the meeting</label>
+          <input id="c-date" type="date" required>
+        </div>
+        <div class="field">
+          <label for="c-meeting">Meeting you attended</label>
+          <select id="c-meeting" aria-describedby="c-meeting-hint" required></select>
+          <span class="hint" id="c-meeting-hint">The list shows the meetings held on the date you chose. Times are U.S. Eastern.</span>
+        </div>
+        <button class="btn" type="submit">Make my confirmation</button>
+      </form>
+
+      <div>
+        <div class="cert" id="cert">
+          <div class="seal">Meeting<br>attended</div>
+          <p>Step Chat confirms that</p>
+          <div class="c-name" id="o-name">Your name</div>
+          <p>attended the</p>
+          <h3 id="o-meeting">Meeting name</h3>
+          <p id="o-fellowship">held online at StepChat.com</p>
+          <div class="c-meta">
+            <div><strong>Date</strong><span id="o-date">Date of meeting</span></div>
+            <div><strong>Time</strong><span id="o-time">Start time</span></div>
+            <div><strong>Username</strong><span id="o-user">Username</span></div>
+            <div><strong>Confirmation</strong><span id="o-code">Not issued yet</span></div>
+          </div>
+          <p class="c-note" id="o-note">Sample layout. Fill in the form to make your own.</p>
+        </div>
+        <div class="no-print" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px">
+          <button class="btn" type="button" id="print-btn" disabled>Save as PDF or print</button>
+        </div>
+        <p class="soft no-print" style="margin-top:12px">To save a PDF, choose "Save as PDF" as the printer in the print window.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/site.js"></script>
+  <script>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var F = SC.data.fellowships;
+      var user = SC.auth.current();
+      var log = user ? SC.attendance.list(user.username) : [];
+
+      function isoLocal(d) {
+        return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+      }
+      function fillMeetings(keep) {
+        var sel = $("c-meeting");
+        sel.textContent = "";
+        var date = $("c-date").value ? new Date($("c-date").value + "T12:00:00") : null;
+        if (!date || isNaN(date)) {
+          sel.appendChild(SC.el("option", { value: "", text: "Choose a date first" }));
+          return;
+        }
+        sel.appendChild(SC.el("option", { value: "", text: "Choose a meeting" }));
+        SC.data.meetings.filter(function (m) { return m.day === date.getDay(); })
+          .sort(function (a, b) { return a.h * 60 + a.m - (b.h * 60 + b.m); })
+          .forEach(function (m) {
+            var val = m.f + "|" + m.h + "|" + m.m + "|" + m.name;
+            var o = SC.el("option", { value: val, text: SC.fmtEastern(m) + "  " + m.name });
+            if (keep && keep === m.name) o.selected = true;
+            sel.appendChild(o);
+          });
+      }
+
+      $("c-date").max = isoLocal(new Date());
+      $("c-date").value = isoLocal(new Date());
+      if (user) $("c-user").value = user.username;
+      fillMeetings();
+      $("c-date").addEventListener("change", function () { fillMeetings(); });
+
+      if (log.length) {
+        $("pick-field").hidden = false;
+        log.forEach(function (e, i) {
+          $("c-pick").appendChild(SC.el("option", { value: String(i), text: e.name + ", " + new Date(e.joined).toLocaleDateString([], { month: "short", day: "numeric" }) }));
+        });
+        var usePick = function () {
+          var e = log[parseInt($("c-pick").value, 10)];
+          if (!e) return;
+          $("c-date").value = e.date;
+          fillMeetings(e.name);
+        };
+        $("c-pick").addEventListener("change", usePick);
+        var want = new URLSearchParams(location.search).get("entry");
+        if (want !== null && log[parseInt(want, 10)]) { $("c-pick").value = String(parseInt(want, 10)); usePick(); }
+      }
+
+      function code(date) {
+        var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", out = "";
+        var rnd = new Uint8Array(4);
+        crypto.getRandomValues(rnd);
+        for (var i = 0; i < 4; i++) out += chars[rnd[i] % chars.length];
+        return "SC-" + date.replace(/-/g, "").slice(2) + "-" + out;
+      }
+
+      $("cert-form").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var fields = [
+          [$("c-name"), "Type the name to show on the confirmation."],
+          [$("c-user"), "Type your Step Chat username."],
+          [$("c-date"), "Choose the date of the meeting."],
+          [$("c-meeting"), "Choose the meeting you attended."]
+        ];
+        var first = null;
+        fields.forEach(function (f) {
+          var miss = !f[0].value.trim();
+          f[0].closest(".field").classList.toggle("bad", miss);
+          f[0].setAttribute("aria-invalid", miss ? "true" : "false");
+          if (miss && !first) first = f;
+        });
+        var msg = $("cert-msg");
+        msg.textContent = "";
+        if (first) {
+          msg.appendChild(SC.el("p", { class: "notice bad", text: first[1] }));
+          return first[0].focus();
+        }
+        var parts = $("c-meeting").value.split("|");
+        var m = { f: parts[0], h: parseInt(parts[1], 10), m: parseInt(parts[2], 10), name: parts.slice(3).join("|") };
+        var date = new Date($("c-date").value + "T12:00:00");
+
+        $("o-name").textContent = $("c-name").value.trim();
+        $("o-meeting").textContent = m.name;
+        $("o-fellowship").textContent = F[m.f].long + " meeting, held online at StepChat.com";
+        $("o-date").textContent = date.toLocaleDateString([], { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+        $("o-time").textContent = SC.fmtEastern(m) + " Eastern";
+        $("o-user").textContent = $("c-user").value.trim();
+        $("o-code").textContent = code($("c-date").value);
+        $("o-note").textContent = "Issued " + new Date().toLocaleDateString([], { year: "numeric", month: "long", day: "numeric" }) + " at StepChat.com.";
+        $("print-btn").disabled = false;
+        msg.appendChild(SC.el("p", { class: "notice good", text: "Your confirmation is ready. Choose \"Save as PDF or print\" to keep a copy." }));
+        if (window.matchMedia("(max-width: 980px)").matches) $("cert").scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+
+      $("print-btn").addEventListener("click", function () { window.print(); });
+    })();
+  </script>
+</body>
+</html>

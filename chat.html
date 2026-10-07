@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Chat | Step Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="chat">
+  <header id="site-header"></header>
+
+  <main id="main">
+    <div class="gate" id="gate" hidden>
+      <div class="panel">
+        <h1 style="font-size:2rem">Log in to join the chat</h1>
+        <p>You need a registered username to enter the Lounge and the meeting rooms.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn" href="account.html?tab=register&next=chat.html">Join Step Chat</a>
+          <a class="btn ghost" href="account.html?next=chat.html">Log in</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-shell" id="shell" hidden>
+      <aside class="rooms" id="rooms" aria-label="Rooms">
+        <h2>Rooms</h2>
+        <div id="room-list"></div>
+        <hr>
+        <a class="room-btn" href="account.html"><strong>Profile</strong><span>Change password, attendance record</span></a>
+        <a class="room-btn" href="meetings.html"><strong>Meeting calendar</strong><span>Every meeting this week</span></a>
+      </aside>
+
+      <section class="chat-main" aria-label="Conversation">
+        <div class="chat-top">
+          <button class="icon-btn" type="button" id="rooms-toggle" aria-label="Rooms menu" aria-expanded="false"><i class="ph ph-list" aria-hidden="true"></i></button>
+          <div>
+            <h1 id="room-title">The Lounge</h1>
+            <p id="room-sub">Open fellowship chat</p>
+          </div>
+        </div>
+        <div class="chat-log" id="log" role="log" aria-live="polite" tabindex="0"></div>
+        <div class="composer">
+          <div class="quick" id="quick">
+            <button class="btn ghost small" type="button" data-send="!">Raise hand (!)</button>
+            <button class="btn ghost small" type="button" data-append=" ...">More to say (...)</button>
+            <button class="btn ghost small" type="button" data-append=" [done]">Finished ([done])</button>
+            <span class="pm-to" id="pm-to" hidden></span>
+          </div>
+          <form id="send-form">
+            <label class="sr-only" for="msg">Message</label>
+            <input id="msg" type="text" autocomplete="off" maxlength="400" placeholder="Type a message">
+            <button class="btn" type="submit">Send</button>
+          </form>
+        </div>
+      </section>
+
+      <aside class="people" aria-label="People in this room">
+        <h2 id="people-title">In this room</h2>
+        <div id="people-list"></div>
+        <p class="soft" style="font-size:0.9rem;margin:14px 8px 0">Choose a name to send a private message.</p>
+      </aside>
+    </div>
+  </main>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/site.js"></script>
+  <script src="assets/chat.js"></script>
+</body>
+</html>

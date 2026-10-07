@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Meeting schedule | Step Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="meetings">
+  <div id="preview-note"></div>
+  <header id="site-header"></header>
+
+  <main id="main">
+    <div class="wrap page-head">
+      <h1>Meeting schedule</h1>
+      <p>Log in a few minutes early and wait in the Lounge, or go straight to the meeting room.</p>
+    </div>
+
+    <div class="wrap" style="padding-bottom:84px">
+      <div class="chips" role="group" aria-label="Fellowship" id="f-chips"></div>
+      <div class="chips" role="group" aria-label="Day" id="d-chips"></div>
+      <div class="chips" role="group" aria-label="Time zone" id="z-chips"></div>
+      <div id="results" aria-live="polite"></div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/site.js"></script>
+  <script>
+    (function () {
+      var F = SC.data.fellowships;
+      var params = new URLSearchParams(location.search);
+      var state = { f: F[params.get("f")] ? params.get("f") : "all", day: "today", zone: "local" };
+
+      function chips(id, key, options) {
+        var box = document.getElementById(id);
+        options.forEach(function (o) {
+          var b = SC.el("button", { type: "button", text: o[1] });
+          b.addEventListener("click", function () { state[key] = o[0]; draw(); });
+          b.dataset.val = o[0];
+          box.appendChild(b);
+        });
+      }
+      chips("f-chips", "f", [["all", "All fellowships"], ["aa", "A.A."], ["alanon", "Al-Anon"], ["aca", "ACA"], ["other", "Combined and other"]]);
+      chips("d-chips", "day", [["today", "Today"], ["week", "Whole week"]].concat(SC.DAYS.map(function (d, i) { return [String(i), d]; })));
+      chips("z-chips", "zone", [["local", "My time (" + SC.zoneName() + ")"], ["et", "U.S. Eastern"]]);
+
+      function draw() {
+        ["f", "day", "zone"].forEach(function (key) {
+          var id = key === "f" ? "f-chips" : key === "day" ? "d-chips" : "z-chips";
+          Array.prototype.forEach.call(document.getElementById(id).children, function (b) {
+            b.setAttribute("aria-pressed", b.dataset.val === state[key] ? "true" : "false");
+          });
+        });
+
+        var local = state.zone === "local";
+        var todayIdx = local ? new Date().getDay() : SC.easternDay();
+        var items = SC.upcoming().filter(function (m) { return state.f === "all" || m.f === state.f; });
+        items.forEach(function (m) {
+          m.showDay = local ? m.start.getDay() : m.day;
+          m.sortKey = local ? m.start.getHours() * 60 + m.start.getMinutes() : m.h * 60 + m.m;
+        });
+
+        var days = state.day === "week" ? [0, 1, 2, 3, 4, 5, 6].map(function (i) { return (todayIdx + i) % 7; })
+          : [state.day === "today" ? todayIdx : parseInt(state.day, 10)];
+        var out = document.getElementById("results");
+        out.textContent = "";
+        var total = 0;
+
+        days.forEach(function (d) {
+          var rows = items.filter(function (m) { return m.showDay === d; }).sort(function (a, b) { return a.sortKey - b.sortKey; });
+          if (!rows.length) return;
+          total += rows.length;
+          out.appendChild(SC.el("h2", { class: "day-head", text: SC.DAYS[d] + (d === todayIdx ? " (today)" : "") }));
+          var ul = SC.el("ul", { class: "sched" });
+          rows.forEach(function (m) {
+            var li = SC.el("li", m.live ? { class: "live" } : {});
+            li.appendChild(SC.el("time", { text: local ? SC.fmtTime(m.start) : SC.fmtEastern(m) }));
+            li.appendChild(SC.el("span", { class: "m-name", text: m.name }));
+            li.appendChild(SC.el("span", { class: "tag" + (m.live ? " live" : ""), text: m.live ? "Meeting now" : F[m.f].label }));
+            li.appendChild(SC.el("a", { href: "chat.html?room=" + m.f, text: m.live ? "Join the room" : "Open the room" }));
+            ul.appendChild(li);
+          });
+          out.appendChild(ul);
+        });
+
+        if (!total) out.appendChild(SC.el("p", { class: "empty", text: "No meetings match on this day. Choose \"Whole week\" to see every meeting for this fellowship." }));
+      }
+      draw();
+      setInterval(draw, 60000);
+    })();
+  </script>
+</body>
+</html>

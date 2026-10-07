@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Your account | Step Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body data-page="account">
+  <div id="preview-note"></div>
+  <header id="site-header"></header>
+
+  <main id="main">
+    <!-- Signed out: log in, register, forgot password -->
+    <div class="wrap narrow" id="signed-out" hidden style="padding-top:52px;padding-bottom:84px">
+      <h1 id="auth-title" style="font-size:2.4rem">Log in</h1>
+      <div class="tabs" role="tablist" aria-label="Account">
+        <button type="button" role="tab" data-tab="login" id="tab-login">Log in</button>
+        <button type="button" role="tab" data-tab="register" id="tab-register">Register</button>
+        <button type="button" role="tab" data-tab="forgot" id="tab-forgot">Forgot password</button>
+      </div>
+
+      <div class="panel">
+        <div id="auth-msg" role="alert"></div>
+
+        <form id="form-login" novalidate>
+          <div class="field">
+            <label for="l-user">Username</label>
+            <input id="l-user" type="text" autocomplete="username" required>
+          </div>
+          <div class="field">
+            <label for="l-pass">Password</label>
+            <input id="l-pass" type="password" autocomplete="current-password" required>
+          </div>
+          <button class="btn" type="submit">Log in</button>
+          <p class="soft" style="margin:18px 0 0">New here? Register a username first, then log in.</p>
+        </form>
+
+        <form id="form-register" novalidate hidden>
+          <div class="field">
+            <label for="r-user">Username</label>
+            <input id="r-user" type="text" autocomplete="username" aria-describedby="r-user-hint" required>
+            <span class="hint" id="r-user-hint">Add numbers to make it unique, like Hopeful_2024. Don't use your full name. Usernames can't be changed later.</span>
+          </div>
+          <div class="field">
+            <label for="r-pass">Password</label>
+            <input id="r-pass" type="password" autocomplete="new-password" aria-describedby="r-pass-hint" required>
+            <span class="hint" id="r-pass-hint">At least 8 characters. <button type="button" class="linkish" id="r-show">Show password</button></span>
+          </div>
+          <div class="field">
+            <label for="r-email">Email address</label>
+            <input id="r-email" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="r-q">Security question</label>
+            <select id="r-q" required>
+              <option value="">Choose a question</option>
+              <option>What was the name of your first pet?</option>
+              <option>What street did you grow up on?</option>
+              <option>What was your first car?</option>
+              <option>What is your favorite meal?</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="r-a">Your answer</label>
+            <input id="r-a" type="text" autocomplete="off" aria-describedby="r-a-hint" required>
+            <span class="hint" id="r-a-hint">You'll need this if you forget your password.</span>
+          </div>
+          <label class="check" for="r-agree">
+            <input id="r-agree" type="checkbox" required>
+            <span>I have read and agree to the <a href="help.html#agreement">user agreement</a>.</span>
+          </label>
+          <button class="btn" type="submit">Register</button>
+        </form>
+
+        <form id="form-forgot" novalidate hidden>
+          <div class="field">
+            <label for="f-user">Username</label>
+            <input id="f-user" type="text" autocomplete="username" required>
+          </div>
+          <div id="f-step2" hidden>
+            <div class="field">
+              <label for="f-a" id="f-q">Security question</label>
+              <input id="f-a" type="text" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="f-pass">New password</label>
+              <input id="f-pass" type="password" autocomplete="new-password" aria-describedby="f-pass-hint">
+              <span class="hint" id="f-pass-hint">At least 8 characters.</span>
+            </div>
+          </div>
+          <button class="btn" type="submit" id="f-btn">Find my security question</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Signed in: profile -->
+    <div class="wrap" id="signed-in" hidden style="padding-bottom:84px">
+      <div class="page-head" style="padding-left:0;padding-right:0">
+        <h1 id="hello">Your account</h1>
+        <p id="since" class="soft"></p>
+        <div class="cta-row" style="display:flex;gap:12px;flex-wrap:wrap">
+          <a class="btn" href="chat.html">Open the chat</a>
+          <a class="btn ghost" href="certificate.html">Confirm my attendance</a>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div>
+          <h2 style="font-size:1.6rem">Meetings you've attended</h2>
+          <div id="log-box"></div>
+        </div>
+        <div class="panel">
+          <h2 style="font-size:1.4rem">Change your password</h2>
+          <div id="pw-msg" role="alert"></div>
+          <form id="form-pw" novalidate>
+            <div class="field">
+              <label for="p-old">Current password</label>
+              <input id="p-old" type="password" autocomplete="current-password" required>
+            </div>
+            <div class="field">
+              <label for="p-new">New password</label>
+              <input id="p-new" type="password" autocomplete="new-password" aria-describedby="p-new-hint" required>
+              <span class="hint" id="p-new-hint">At least 8 characters.</span>
+            </div>
+            <button class="btn ghost" type="submit">Save new password</button>
+          </form>
+          <p class="soft" style="margin:22px 0 0">Usernames can't be changed. <a href="help.html#contact">Ask tech support</a> to remove your account so you can start over.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/site.js"></script>
+  <script>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var user = SC.auth.current();
+      var params = new URLSearchParams(location.search);
+      var next = params.get("next");
+      var safeNext = next && /^[a-z]+\.html(\?[\w=&-]*)?$/.test(next) ? next : "chat.html";
+
+      function say(box, kind, text) {
+        box.textContent = "";
+        if (text) box.appendChild(SC.el("p", { class: "notice " + kind, text: text }));
+      }
+      function bad(input, on) { input.closest(".field").classList.toggle("bad", on); input.setAttribute("aria-invalid", on ? "true" : "false"); }
+
+      if (user) {
+        $("signed-in").hidden = false;
+        $("hello").textContent = "Hello, " + user.username;
+        $("since").textContent = "Member since " + new Date(user.joined).toLocaleDateString([], { year: "numeric", month: "long", day: "numeric" }) + ". Registered email: " + user.email;
+
+        var log = SC.attendance.list(user.username);
+        var box = $("log-box");
+        if (!log.length) {
+          box.appendChild(SC.el("p", { class: "soft", text: "Nothing here yet. When you sit in on a meeting, it's added to this list so you can print a confirmation later." }));
+          box.appendChild(SC.el("a", { href: "meetings.html", text: "Find a meeting" }));
+        } else {
+          var table = SC.el("table", { class: "log" });
+          table.appendChild(SC.el("tr", {}, [SC.el("th", { scope: "col", text: "Meeting" }), SC.el("th", { scope: "col", text: "Date" }), SC.el("th", { scope: "col", text: "Proof" })]));
+          log.forEach(function (e, i) {
+            table.appendChild(SC.el("tr", {}, [
+              SC.el("td", { text: e.name }),
+              SC.el("td", { text: new Date(e.joined).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric", year: "numeric" }) }),
+              SC.el("td", {}, [SC.el("a", { href: "certificate.html?entry=" + i, text: "Print confirmation" })])
+            ]));
+          });
+          box.appendChild(table);
+        }
+
+        $("form-pw").addEventListener("submit", function (ev) {
+          ev.preventDefault();
+          var oldP = $("p-old"), newP = $("p-new");
+          bad(newP, newP.value.length < 8);
+          if (newP.value.length < 8) return say($("pw-msg"), "bad", "Your new password needs at least 8 characters.");
+          SC.auth.login(user.username, oldP.value).then(function () {
+            return SC.auth.setPassword(user.username, newP.value);
+          }).then(function () {
+            bad(oldP, false);
+            ev.target.reset();
+            say($("pw-msg"), "good", "Password saved.");
+          }).catch(function () {
+            bad(oldP, true);
+            say($("pw-msg"), "bad", "The current password doesn't match. Check it and try again.");
+          });
+        });
+        return;
+      }
+
+      // Signed out
+      $("signed-out").hidden = false;
+      var titles = { login: "Log in", register: "Join Step Chat", forgot: "Forgot password" };
+      function show(tab) {
+        ["login", "register", "forgot"].forEach(function (t) {
+          $("form-" + t).hidden = t !== tab;
+          $("tab-" + t).setAttribute("aria-selected", t === tab ? "true" : "false");
+        });
+        $("auth-title").textContent = titles[tab];
+        say($("auth-msg"), "", "");
+      }
+      Array.prototype.forEach.call(document.querySelectorAll("[data-tab]"), function (b) {
+        b.addEventListener("click", function () { show(b.dataset.tab); });
+      });
+      show(titles[params.get("tab")] ? params.get("tab") : "login");
+
+      $("r-show").addEventListener("click", function () {
+        var p = $("r-pass"), on = p.type === "password";
+        p.type = on ? "text" : "password";
+        this.textContent = on ? "Hide password" : "Show password";
+      });
+
+      $("form-login").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        SC.auth.login($("l-user").value.trim(), $("l-pass").value).then(function () {
+          location.href = safeNext;
+        }).catch(function () {
+          say($("auth-msg"), "bad", "Username and password do not match. If you haven't registered yet, choose Register first.");
+          $("l-user").focus();
+        });
+      });
+
+      $("form-register").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        var u = $("r-user"), p = $("r-pass"), e = $("r-email"), q = $("r-q"), a = $("r-a");
+        var problems = [];
+        var checks = [
+          [u, /^[A-Za-z0-9_.-]{3,20}$/.test(u.value.trim()), "Choose a username of 3 to 20 letters, numbers, dots, dashes or underscores."],
+          [p, p.value.length >= 8, "Your password needs at least 8 characters."],
+          [e, /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e.value.trim()), "Enter an email address like name@example.com."],
+          [q, !!q.value, "Choose a security question."],
+          [a, a.value.trim().length > 1, "Type an answer to your security question."]
+        ];
+        checks.forEach(function (c) { bad(c[0], !c[1]); if (!c[1]) problems.push(c); });
+        if (!$("r-agree").checked) problems.push([$("r-agree"), false, "Tick the box to agree to the user agreement."]);
+        if (problems.length) {
+          say($("auth-msg"), "bad", problems[0][2]);
+          return problems[0][0].focus();
+        }
+        SC.auth.register({ username: u.value.trim(), password: p.value, email: e.value.trim(), question: q.value, answer: a.value }).then(function (nu) {
+          show("login");
+          $("l-user").value = nu.username;
+          say($("auth-msg"), "good", "You're registered, " + nu.username + ". Log in with your new password.");
+          $("l-pass").focus();
+        }).catch(function () {
+          bad(u, true);
+          say($("auth-msg"), "bad", "That username is already taken. Choose a different name or add numbers to it.");
+          u.focus();
+        });
+      });
+
+      var forgotUser = null;
+      $("form-forgot").addEventListener("submit", function (ev) {
+        ev.preventDefault();
+        if (!forgotUser) {
+          var found = SC.auth.users()[$("f-user").value.trim().toLowerCase()];
+          if (!found) return say($("auth-msg"), "bad", "No account uses that username. Check the spelling, or register a new one.");
+          forgotUser = found;
+          $("f-q").textContent = found.question;
+          $("f-step2").hidden = false;
+          $("f-user").readOnly = true;
+          $("f-btn").textContent = "Save new password";
+          say($("auth-msg"), "", "");
+          return $("f-a").focus();
+        }
+        if ($("f-pass").value.length < 8) return say($("auth-msg"), "bad", "Your new password needs at least 8 characters.");
+        SC.auth.checkAnswer(forgotUser.username, $("f-a").value).then(function (ok) {
+          if (!ok) return say($("auth-msg"), "bad", "That answer doesn't match the one you gave when you registered. Try again, or ask tech support for help.");
+          return SC.auth.setPassword(forgotUser.username, $("f-pass").value).then(function () {
+            var name = forgotUser.username;
+            forgotUser = null;
+            ev.target.reset();
+            $("f-step2").hidden = true;
+            $("f-user").readOnly = false;
+            $("f-btn").textContent = "Find my security question";
+            show("login");
+            $("l-user").value = name;
+            say($("auth-msg"), "good", "New password saved. Log in with it now.");
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
